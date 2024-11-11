@@ -1,13 +1,26 @@
 #include "tests.h"
+#include<iostream>
+using namespace std;
 
 // 练习1，实现库函数strlen
-int my_strlen(char *str) {
+int my_strlen(char *str) {     
+        /* code */
     /**
      * 统计字符串的长度，太简单了。
      */
 
     // IMPLEMENT YOUR CODE HERE
-    return 0;
+    int i;
+    for(;1;)
+    {
+        if(*str != '\0')
+        {
+            i++;
+            str++;
+        }                
+            break;        
+    }    
+    return i;
 }
 
 
@@ -19,6 +32,20 @@ void my_strcat(char *str_1, char *str_2) {
      */
 
     // IMPLEMENT YOUR CODE HERE
+    char sum1[1000000];
+    char *sum2 = sum1;
+
+    while (*str_1 != '\0')
+    {
+        *sum2++ = *str_1++;
+    }
+    while (*str_2 != '\0')
+    {
+        *sum2++ = *str_2++;
+    }
+    *sum2 = '\0'; 
+
+    cout << sum1;
 }
 
 
@@ -31,7 +58,23 @@ char* my_strstr(char *s, char *p) {
      */
 
     // IMPLEMENT YOUR CODE HERE
-    return 0;
+    for(;*s != '\0';s++)
+    {
+        if(*s == *p)
+        {
+            const char *a = s;
+            const char *b = p;            
+            while(*a != '\0'&&*b != '\0'&&*a == *b){
+                a++;
+                b++;
+            }
+            if(*b == '\0')
+            {                
+                return s;
+            }
+        }
+    }   
+    return NULL;   
 }
 
 
@@ -96,7 +139,20 @@ void rgb2gray(float *in, float *out, int h, int w) {
      */
 
     // IMPLEMENT YOUR CODE HERE
-    // ...
+    // ...    
+    for(int i = 0;i < h;i++)
+    {
+        for(int j = 0;j < w;j++)
+        {
+            int num = 3*i*w+3*j;    
+            float R = in[num];
+            float G = in[num+1];
+            float B = in[num+2];
+
+            float gray = 0.1140 * B  + 0.5870 * G + 0.2989 * R;
+            out[i*w+j] = gray;      
+        }
+    }
 }
 
 // 练习5，实现图像处理算法 resize：缩小或放大图像
@@ -112,7 +168,7 @@ void resize(float *in, float *out, int h, int w, int c, float scale) {
      *                                * (x2, y2), v2
      *                               /
      *                              /
-     *                             * (x, y), v
+     *                             * (x, y), v(像素值)
      *                            /
      *                           * (x1, y1), v1
      *
@@ -198,7 +254,37 @@ void resize(float *in, float *out, int h, int w, int c, float scale) {
 
     int new_h = h * scale, new_w = w * scale;
     // IMPLEMENT YOUR CODE HERE
+    for (int y = 0; y < new_h; y++)
+    {
+        for (int x = 0; x < new_w; x++) 
+        {
+            float srcX = x / scale;
+            float srcY = y / scale;
 
+            int x1 = static_cast<int>(float(srcX));
+            int y1 = static_cast<int>(float(srcY));
+            int x2 = x1 + 1;
+            int y2 = y1 + 1;
+
+            if (x2 >= w) x2 = w - 1;
+            if (y2 >= h) y2 = h - 1;
+            
+            float dx = srcX - x1;
+            float dy = srcY - y1;
+
+            for (int i = 0; i < c; i++) 
+            {
+                float value = 0.0;
+                value += (1 - dx) * (1 - dy) * in[(y1 * w + x1) * c + i];
+                value += dx * (1 - dy) * in[(y1 * w + x2) * c + i];
+                value += (1 - dx) * dy * in[(y2 * w + x1) * c + i];
+                value += dx * dy * in[(y2 * w + x2) * c + i];
+
+                int outIndex = (y * new_w + x) * c + i;
+                out[outIndex] = value;
+            }
+        }
+    }
 }
 
 
@@ -220,5 +306,36 @@ void hist_eq(float *in, int h, int w) {
      * (3) 使用数组来实现灰度级 => 灰度级的映射
      */
 
-    // IMPLEMENT YOUR CODE HERE
+    // IMPLEMENT YOUR CODE HERE    
+    int hist[256] = {0};
+    for (int i = 0; i < h; i++) 
+    {
+        for (int j = 0; j < w; j++) 
+        {
+            int num = static_cast<int>(in[i * w + j]);
+            hist[num]++;
+        }
+    }
+
+    int cdf[256] = {0};
+    int sum = h * w;
+    for (int i = 0; i < 256; i++) 
+    {
+        cdf[i] = (i == 0) ? hist[0] : cdf[i - 1] + hist[i];
+    }
+   
+    for (int i = 0; i < 256; i++) 
+    {
+        cdf[i] = (cdf[i] * 255 + sum / 2) / sum;
+    }
+
+    for (int i = 0; i < h; i++) 
+    {
+        for (int j = 0; j < w; j++) 
+        {
+            int num = static_cast<int>(in[i * w + j]);
+            int num1 = cdf[num];
+            in[i * w + j] = static_cast<float>(num1);
+        }
+    }
 }

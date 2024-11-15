@@ -326,7 +326,7 @@ void hist_eq(float *in, int h, int w) {
    
     for (int i = 0; i < 256; i++) 
     {
-        cdf[i] = (cdf[i] * 255 + sum / 2) / sum;
+        cdf[i] = (cdf[i]*256)/sum;
     }
 
     for (int i = 0; i < h; i++) 
